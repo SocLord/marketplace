@@ -2,23 +2,23 @@
 left to right direction
 title Маркетплейс: Диаграмма вариантов использования (Use Case)
 
-actor "Харидор\n(buyer)" as Buyer
-actor "Фурӯшанда\n(seller)" as Seller
+actor "Покупатель\n(buyer)" as Buyer
+actor "Продавец\n(seller)" as Seller
 actor "Модератор\n(moderator)" as Moderator
 actor "Администратор\n(admin)" as Admin
 
 rectangle "marketplace" {
-  usecase "Воридшавӣ ба система\n(Аутентификация)" as UC1
-  usecase "Ҷустуҷӯ ва филтри молҳо" as UC2
-  usecase "Илова кардан ба сабад" as UC3
-  usecase "Расмӣ кардани фармоиш\n(Оформить заказ)" as UC4
+  usecase "Войти в систему" as UC1
+  usecase "Найти и отфильтровать товары" as UC2
+  usecase "Добавить товар в корзину" as UC3
+  usecase "Оформить заказ" as UC4
   usecase "Проверить наличие товаров" as UC5
-  usecase "Эҷод ва таҳрири корти мол" as UC6
-  usecase "Тасдиқ ё рад кардани мол\n(Модерация)" as UC7
-  usecase "Рад кардан бо шарҳ" as UC8
-  usecase "Иваз кардани статуси SubOrder" as UC9
-  usecase "Гузоштани шарҳ ва баҳо" as UC10
-  usecase "Идоракунии категорияҳо" as UC11
+  usecase "Создать и редактировать карточку товара" as UC6
+  usecase "Провести модерацию товара" as UC7
+  usecase "Отклонить товар с комментарием" as UC8
+  usecase "Изменить статус подзаказа" as UC9
+  usecase "Оставить отзыв и оценку" as UC10
+  usecase "Управлять категориями" as UC11
 }
 
 ' Связи акторов с вариантами использования

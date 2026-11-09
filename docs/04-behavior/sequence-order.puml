@@ -1,7 +1,7 @@
 @startuml sequence-order
 title Согласование подзаказа продавцом (Update SubOrder Status)
 
-actor "Фурӯшанда\n(seller)" as Seller
+actor "Продавец\n(seller)" as Seller
 participant "Браузер\n(Frontend)" as Browser
 participant "main.go\n(Router)" as Router
 participant "OrderController" as Controller
