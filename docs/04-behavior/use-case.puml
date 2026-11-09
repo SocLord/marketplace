@@ -1,0 +1,56 @@
+@startuml use-case
+left to right direction
+title Маркетплейс: Диаграмма вариантов использования (Use Case)
+
+actor "Харидор\n(buyer)" as Buyer
+actor "Фурӯшанда\n(seller)" as Seller
+actor "Модератор\n(moderator)" as Moderator
+actor "Администратор\n(admin)" as Admin
+
+rectangle "marketplace" {
+  usecase "Воридшавӣ ба система\n(Аутентификация)" as UC1
+  usecase "Ҷустуҷӯ ва филтри молҳо" as UC2
+  usecase "Илова кардан ба сабад" as UC3
+  usecase "Расмӣ кардани фармоиш\n(Оформить заказ)" as UC4
+  usecase "Проверить наличие товаров" as UC5
+  usecase "Эҷод ва таҳрири корти мол" as UC6
+  usecase "Тасдиқ ё рад кардани мол\n(Модерация)" as UC7
+  usecase "Рад кардан бо шарҳ" as UC8
+  usecase "Иваз кардани статуси SubOrder" as UC9
+  usecase "Гузоштани шарҳ ва баҳо" as UC10
+  usecase "Идоракунии категорияҳо" as UC11
+}
+
+' Связи акторов с вариантами использования
+Buyer --> UC1
+Buyer --> UC2
+Buyer --> UC3
+Buyer --> UC4
+Buyer --> UC10
+
+Seller --> UC1
+Seller --> UC6
+Seller --> UC9
+
+Moderator --> UC1
+Moderator --> UC7
+
+Admin --> UC1
+Admin --> UC11
+
+' Отношения include и extend
+UC4 ..> UC5 : <<include>>
+UC8 ..> UC7 : <<extend>>
+UC10 ..> UC4 : <<extend>>
+
+note right of UC4
+  ФТ-06: Оформление заказа
+  включает проверку остатков (UC5)
+end note
+
+note right of UC8
+  ФТ-03: Модерация
+  расширяется отклонением с комментарием
+end note
+
+@enduml

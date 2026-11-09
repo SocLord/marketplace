@@ -1,0 +1,34 @@
+@startuml sequence-order
+title Согласование подзаказа продавцом (Update SubOrder Status)
+
+actor "Фурӯшанда\n(seller)" as Seller
+participant "Браузер\n(Frontend)" as Browser
+participant "main.go\n(Router)" as Router
+participant "OrderController" as Controller
+participant "OrderRepository" as Repo
+database "MS SQL Server\n(sub_orders)" as DB
+
+Seller -> Browser : нажимает «Подтвердить заказ» (SubOrder ID=15)
+Browser -> Router : PUT /api/orders/sub-orders/15/status\n{ "status": "processing" }
+Router -> Controller : UpdateSubOrderStatus(15, request)
+
+Controller -> Controller : Проверка JWT токена и \nпринадлежности ShopID текущему пользователю
+
+Controller -> Repo : FindSubOrderByID(15)
+Repo -> DB : SELECT * FROM sub_orders WHERE id = 15
+DB --> Repo : Возврат строки (status='pending', shop_id=5)
+Repo --> Controller : Объект SubOrder
+
+alt Статус == 'pending' И ShopID совпадает
+  Controller -> Repo : UpdateStatus(15, "processing")
+  Repo -> DB : UPDATE sub_orders \nSET status = 'processing', updated_at = GETDATE() \nWHERE id = 15
+  DB --> Repo : 1 строка изменена (RowsAffected = 1)
+  Repo --> Controller : Успех
+  Controller --> Browser : 200 OK { "message": "Статус обновлён" }
+else Статус != 'pending' ИЛИ ShopID не совпадает
+  Controller --> Browser : 403 Forbidden \n{ "error": "Невозможно изменить статус" }
+end
+
+Browser --> Seller : Обновление списка заказов (статус стал 'processing')
+
+@enduml
