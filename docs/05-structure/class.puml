@@ -1,0 +1,272 @@
+@startuml class
+title marketplace: Диаграмма классов
+
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Доменная модель" {
+  
+  class User<<entity>> {
+    +id: int64
+    +name: string
+    +email: string
+    -passwordHash: string
+    +role: UserRole
+    +phone: string
+    +avatarURL: string
+    +createdAt: time.Time
+    +updatedAt: time.Time
+  }
+  
+  class Shop<<entity>> {
+    +id: int64
+    +userID: int64
+    +name: string
+    +slug: string
+    +description: string
+    +logoURL: string
+    +bannerURL: string
+    +phone: string
+    +address: string
+    +rating: float64
+    +isVerified: bool
+    +createdAt: time.Time
+    +updatedAt: time.Time
+  }
+  
+  class Category<<entity>> {
+    +id: int64
+    +name: string
+    +slug: string
+    +icon: string
+    +imageURL: string
+    +description: string
+    +sortOrder: int
+    +createdAt: time.Time
+  }
+  
+  class Product<<entity>> {
+    +id: int64
+    +shopID: int64
+    +categoryID: int64
+    +name: string
+    +slug: string
+    +description: string
+    +price: float64
+    +oldPrice: *float64
+    +stockQuantity: int
+    +imageURL: string
+    +additionalImages: string
+    +status: ProductStatus
+    +moderationComment: string
+    +rating: float64
+    +reviewsCount: int
+    +salesCount: int
+    +createdAt: time.Time
+    +updatedAt: time.Time
+  }
+  
+  class Order<<entity>> {
+    +id: int64
+    +orderNumber: string
+    +userID: int64
+    +totalAmount: float64
+    +status: OrderStatus
+    +recipientName: string
+    +recipientPhone: string
+    +shippingAddress: string
+    +paymentMethod: string
+    +notes: string
+    +createdAt: time.Time
+    +updatedAt: time.Time
+  }
+  
+  class SubOrder<<entity>> {
+    +id: int64
+    +orderID: int64
+    +shopID: int64
+    +subtotalAmount: float64
+    +status: SubOrderStatus
+    +shippingTracking: string
+    +createdAt: time.Time
+    +updatedAt: time.Time
+  }
+  
+  class OrderItem<<entity>> {
+    +id: int64
+    +orderID: int64
+    +subOrderID: int64
+    +shopID: int64
+    +productID: int64
+    +productName: string
+    +productPrice: float64
+    +quantity: int
+    +totalPrice: float64
+    +imageURL: string
+    +createdAt: time.Time
+  }
+  
+  class Review<<entity>> {
+    +id: int64
+    +productID: int64
+    +userID: int64
+    +orderID: *int64
+    +rating: int
+    +comment: string
+    +createdAt: time.Time
+    +updatedAt: time.Time
+  }
+  
+  enum UserRole {
+    buyer
+    seller
+    moderator
+    admin
+  }
+  
+  enum ProductStatus {
+    pending
+    approved
+    rejected
+    deleted
+  }
+  
+  enum OrderStatus {
+    processing
+    completed
+    cancelled
+  }
+  
+  enum SubOrderStatus {
+    pending
+    processing
+    shipped
+    delivered
+    cancelled
+  }
+}
+
+' Связи между сущностями
+User "1" *-- "0..1" Shop : владеет >
+Shop "1" o-- "0..*" Product : содержит >
+Category "1" o-- "0..*" Product : категоризирует >
+User "1" o-- "0..*" Order : оформляет >
+Order "1" *-- "1..*" SubOrder : состоит из >
+SubOrder "1" *-- "1..*" OrderItem : включает >
+Shop "1" o-- "0..*" SubOrder : исполняет >
+Product "1" o-- "0..*" OrderItem : продаётся как >
+Product "1" o-- "0..*" Review : получает >
+User "1" o-- "0..*" Review : пишет >
+
+User ..> UserRole
+Product ..> ProductStatus
+Order ..> OrderStatus
+SubOrder ..> SubOrderStatus
+
+package "Приложение (handlers/)" {
+  
+  class AuthController {
+    -db: *gorm.DB
+    +Register(w, r)
+    +Login(w, r)
+    +GetMe(w, r)
+  }
+  
+  class ProductController {
+    -db: *gorm.DB
+    +ListPublicProducts(w, r)
+    +GetPublicProduct(w, r)
+    +SellerListProducts(w, r)
+    +SellerCreateProduct(w, r)
+    +SellerUpdateProduct(w, r)
+    +SellerDeleteProduct(w, r)
+  }
+  
+  class OrderController {
+    -db: *gorm.DB
+    +CreateOrder(w, r)
+    +GetBuyerOrders(w, r)
+    +GetSellerSubOrders(w, r)
+    +UpdateSubOrderStatus(w, r)
+  }
+  
+  class ShopController {
+    -db: *gorm.DB
+    +ListShops(w, r)
+    +GetShop(w, r)
+    +GetMyShop(w, r)
+    +UpdateMyShop(w, r)
+  }
+  
+  class CategoryController {
+    -db: *gorm.DB
+    +ListCategories(w, r)
+    +CreateCategory(w, r)
+    +UpdateCategory(w, r)
+    +DeleteCategory(w, r)
+  }
+  
+  class ReviewController {
+    -db: *gorm.DB
+    +CreateReview(w, r)
+    +GetProductReviews(w, r)
+  }
+  
+  class ModerationController {
+    -db: *gorm.DB
+    +ListPendingProducts(w, r)
+    +ListAllProductsModerator(w, r)
+    +ReviewProduct(w, r)
+  }
+  
+  class StatsController {
+    -db: *gorm.DB
+    +GetSellerMonthlyStats(w, r)
+    +GetModeratorStats(w, r)
+  }
+}
+
+package "database/" {
+  
+  class Database {
+    -DB: *gorm.DB
+    +Connect(dsn: string)
+    +AutoMigrate()
+  }
+  
+  class ProductRepository {
+    -db: *gorm.DB
+    +FindByID(id: int64): Product
+    +FindByShopID(shopID: int64): []Product
+    +FindByCategoryID(catID: int64): []Product
+    +FindPending(): []Product
+    +Create(p: Product): error
+    +Update(p: Product): error
+    +Delete(id: int64): error
+  }
+  
+  class OrderRepository {
+    -db: *gorm.DB
+    +CreateOrder(o: Order): error
+    +FindByUserID(userID: int64): []Order
+    +FindSubOrderByShopID(shopID: int64): []SubOrder
+    +UpdateSubOrderStatus(id: int64, status: string): error
+  }
+}
+
+' Связи контроллеров с репозиториями
+AuthController --> Database
+ProductController --> ProductRepository
+OrderController --> OrderRepository
+ShopController --> Database
+CategoryController --> Database
+ReviewController --> Database
+ModerationController --> ProductRepository
+StatsController --> OrderRepository
+
+ProductRepository ..> Product : читает/пишет
+OrderRepository ..> Order : читает/пишет
+OrderRepository ..> SubOrder : читает/пишет
+OrderRepository ..> OrderItem : читает/пишет
+
+@enduml

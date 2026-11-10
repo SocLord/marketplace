@@ -1,0 +1,52 @@
+@startuml component
+title marketplace: Компоненты (MVC, трёхуровневая архитектура)
+
+skinparam packageStyle rectangle
+
+node "Клиент" {
+  [Браузер\n(HTML/CSS, JavaScript,\nBootstrap 5.3)] as Browser
+}
+
+node "Веб-сервер (Go 1.21+)" {
+  
+  package "Уровень представления (Presentation)" {
+    [main.go\n(front controller)] as Main
+    [handlers/\n(Auth, Product, Order,\nShop, Category, Review,\nModeration, Stats)] as Handlers
+    [utils/\n(JSON responses,\nJWT validation)] as Utils
+  }
+  
+  package "Уровень логики (Application)" {
+    [middleware/\n(Auth, Role check,\nShopID extraction)] as Middleware
+    [gorilla/mux\n(Router)] as Router
+  }
+  
+  package "Уровень доступа к данным (Data Access)" {
+    [database/\n(DB connection,\nAutoMigrate,\nSeed data)] as DBLayer
+    [models/\n(User, Shop, Product,\nOrder, SubOrder,\nOrderItem, Review,\nCategory)] as Models
+  }
+}
+
+database "Microsoft SQL Server\nmarketplace_db" as MSSQL
+
+' Связи между компонентами
+Browser --> Main : HTTP (GET/POST/PUT/DELETE)
+Main --> Router : маршрут
+Router --> Handlers : контроллер
+Handlers --> Middleware : проверка JWT и роли
+Middleware --> Utils : валидация токена
+Handlers --> DBLayer : запрос данных
+DBLayer --> Models : сущности GORM
+DBLayer --> MSSQL : T-SQL, TCP 1433
+Models ..> MSSQL : маппинг ORM
+
+' Обратная связь
+Handlers ..> Browser : JSON response
+DBLayer ..> Handlers : данные или ошибка
+
+legend right
+  Model = models/ + database/
+  View = Браузер (клиентская часть)
+  Controller = handlers/ (через middleware и router)
+endlegend
+
+@enduml
