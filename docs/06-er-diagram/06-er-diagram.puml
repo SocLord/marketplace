@@ -1,12 +1,17 @@
 @startuml er-diagram
 title marketplace: Диаграмма сущность-связь (ER Diagram)
 
+' Настройки для широкой и читаемой диаграммы
 skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 100
 skinparam entity {
   BackgroundColor #FEFECE
   BorderColor #A80036
-  FontSize 12
+  FontSize 11
 }
+
+left to right direction
 
 entity "User" as User {
   * id : int64 <<PK>>
@@ -127,58 +132,25 @@ entity "Review" as Review {
   updatedAt : time.Time
 }
 
-' Связи между сущностями
+' Связи (ТОЛЬКО в одну сторону, чтобы не было каши)
 User ||--o| Shop : "владеет"
-Shop }|--|| User : "принадлежит"
-
 Shop ||--o{ Product : "содержит"
-Product }o--|| Shop : "продаётся в"
-
 Category ||--o{ Product : "категоризирует"
-Product }o--|| Category : "имеет категорию"
-
 User ||--o{ Order : "оформляет"
-Order }o--|| User : "принадлежит пользователю"
-
 Order ||--|{ SubOrder : "состоит из"
-SubOrder }|--|| Order : "часть заказа"
-
 SubOrder ||--|{ OrderItem : "включает"
-OrderItem }|--|| SubOrder : "позиция подзаказа"
-
 Product ||--o{ OrderItem : "продаётся как"
-OrderItem }o--|| Product : "ссылается на товар"
-
 Shop ||--o{ SubOrder : "исполняет"
-SubOrder }o--|| Shop : "для магазина"
-
 Product ||--o{ Review : "получает"
-Review }o--|| Product : "о товаре"
-
 User ||--o{ Review : "пишет"
-Review }o--|| User : "от пользователя"
 
 legend right
-  **Обозначения:**
-  
   * — первичный ключ (PK)
   <<FK>> — внешний ключ
   
   ||--o| : один к одному (0..1)
   ||--o{ : один ко многим (0..*)
   ||--|{ : один ко многим (1..*)
-  }o--|| : многие к одному (0..1)
-  }|--|| : многие к одному (1)
-  
-  **Типы связей:**
-  Композиция (жирная линия): 
-  Order *-- SubOrder *-- OrderItem
-  
-  Агрегация (ромб):
-  Shop o-- Product
-  
-  Ассоциация (простая):
-  User -- Shop
 endlegend
 
 @enduml
