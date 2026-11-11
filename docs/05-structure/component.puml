@@ -9,44 +9,118 @@ node "Клиент" {
 
 node "Веб-сервер (Go 1.21+)" {
   
-  package "Уровень представления (Presentation)" {
-    [main.go\n(front controller)] as Main
-    [handlers/\n(Auth, Product, Order,\nShop, Category, Review,\nModeration, Stats)] as Handlers
-    [utils/\n(JSON responses,\nJWT validation)] as Utils
+  package "Уровень представления (View)" {
+    [utils/\n(JSON responses,\nSlugify, JWT helpers)] as View
   }
   
-  package "Уровень логики (Application)" {
-    [middleware/\n(Auth, Role check,\nShopID extraction)] as Middleware
+  package "Уровень логики (Controller)" {
+    [main.go\n(точка входа)] as Main
     [gorilla/mux\n(Router)] as Router
+    [middleware/\n(Auth JWT, Role check,\nShopID extraction)] as Middleware
+    
+    rectangle "Контроллеры" {
+      [AuthController] as AuthCtrl
+      [ProductController] as ProdCtrl
+      [OrderController] as OrderCtrl
+      [ShopController] as ShopCtrl
+      [CategoryController] as CatCtrl
+      [ReviewController] as RevCtrl
+      [ModerationController] as ModCtrl
+      [StatsController] as StatsCtrl
+    }
   }
   
-  package "Уровень доступа к данным (Data Access)" {
-    [database/\n(DB connection,\nAutoMigrate,\nSeed data)] as DBLayer
-    [models/\n(User, Shop, Product,\nOrder, SubOrder,\nOrderItem, Review,\nCategory)] as Models
+  package "Уровень данных (Model)" {
+    rectangle "Репозитории" {
+      [UserRepository] as UserRepo
+      [ProductRepository] as ProdRepo
+      [OrderRepository] as OrderRepo
+      [ShopRepository] as ShopRepo
+      [CategoryRepository] as CatRepo
+      [ReviewRepository] as RevRepo
+    }
+    
+    rectangle "Сущности (models/)" {
+      [User] as UserModel
+      [Shop] as ShopModel
+      [Product] as ProdModel
+      [Order] as OrderModel
+      [SubOrder] as SubOrderModel
+      [OrderItem] as ItemModel
+      [Review] as RevModel
+      [Category] as CatModel
+    }
+    
+    [database/\n(GORM connection,\nAutoMigrate, Seed)] as DBLayer
   }
 }
 
 database "Microsoft SQL Server\nmarketplace_db" as MSSQL
 
-' Связи между компонентами
-Browser --> Main : HTTP (GET/POST/PUT/DELETE)
-Main --> Router : маршрут
-Router --> Handlers : контроллер
-Handlers --> Middleware : проверка JWT и роли
-Middleware --> Utils : валидация токена
-Handlers --> DBLayer : запрос данных
-DBLayer --> Models : сущности GORM
-DBLayer --> MSSQL : T-SQL, TCP 1433
-Models ..> MSSQL : маппинг ORM
+' Зависимости: Клиент → View → Controller → Model → БД
+Browser --> Main : HTTP запрос\n(GET/POST/PUT/DELETE)
+Main --> Router : передача запроса
+Router --> Middleware : проверка JWT и роли
+Middleware --> AuthCtrl : аутентификация
+Middleware --> ProdCtrl : доступ к товарам
+Middleware --> OrderCtrl : управление заказами
+Middleware --> ShopCtrl : управление магазинами
+Middleware --> CatCtrl : управление категориями
+Middleware --> RevCtrl : отзывы
+Middleware --> ModCtrl : модерация
+Middleware --> StatsCtrl : статистика
 
-' Обратная связь
-Handlers ..> Browser : JSON response
-DBLayer ..> Handlers : данные или ошибка
+' Контроллеры → Репозитории
+AuthCtrl --> UserRepo : регистрация, вход
+ProdCtrl --> ProdRepo : CRUD товаров
+OrderCtrl --> OrderRepo : создание заказов
+ShopCtrl --> ShopRepo : управление магазинами
+CatCtrl --> CatRepo : категории
+RevCtrl --> RevRepo : отзывы
+ModCtrl --> ProdRepo : модерация товаров
+StatsCtrl --> OrderRepo : статистика продаж
+
+' Репозитории → Сущности
+UserRepo ..> UserModel : читает/пишет
+ProdRepo ..> ProdModel : читает/пишет
+OrderRepo ..> OrderModel : читает/пишет
+OrderRepo ..> SubOrderModel : читает/пишет
+OrderRepo ..> ItemModel : читает/пишет
+ShopRepo ..> ShopModel : читает/пишет
+CatRepo ..> CatModel : читает/пишет
+RevRepo ..> RevModel : читает/пишет
+
+' Репозитории → База данных
+UserRepo --> DBLayer : SQL запросы
+ProdRepo --> DBLayer : SQL запросы
+OrderRepo --> DBLayer : SQL запросы
+ShopRepo --> DBLayer : SQL запросы
+CatRepo --> DBLayer : SQL запросы
+RevRepo --> DBLayer : SQL запросы
+
+' База данных → MSSQL
+DBLayer --> MSSQL : T-SQL, TCP 1433\n(GORM ORM)
+
+' Обратная связь: ответы клиенту
+AuthCtrl ..> View : JSON response
+ProdCtrl ..> View : JSON response
+OrderCtrl ..> View : JSON response
+ShopCtrl ..> View : JSON response
+CatCtrl ..> View : JSON response
+RevCtrl ..> View : JSON response
+ModCtrl ..> View : JSON response
+StatsCtrl ..> View : JSON response
+
+View ..> Browser : JSON данные
 
 legend right
-  Model = models/ + database/
-  View = Браузер (клиентская часть)
-  Controller = handlers/ (через middleware и router)
+  **MVC Архитектура:**
+  
+  Model = models/ (сущности) + \nrepositories (database/) + \nMicrosoft SQL Server
+  
+  View = utils/ (JSON responses,\nсериализация данных)
+  
+  Controller = handlers/ (контроллеры) + \nmiddleware/ + router (gorilla/mux)
 endlegend
 
 @enduml
