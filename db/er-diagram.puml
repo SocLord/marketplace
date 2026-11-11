@@ -1,0 +1,184 @@
+@startuml er-diagram
+title marketplace: Диаграмма сущность-связь (ER Diagram)
+
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #FEFECE
+  BorderColor #A80036
+  FontSize 12
+}
+
+entity "User" as User {
+  * id : int64 <<PK>>
+  --
+  name : string
+  email : string
+  - passwordHash : string
+  role : UserRole
+  phone : string
+  avatarURL : string
+  createdAt : time.Time
+  updatedAt : time.Time
+}
+
+entity "Shop" as Shop {
+  * id : int64 <<PK>>
+  --
+  userID : int64 <<FK>>
+  name : string
+  slug : string
+  description : string
+  logoURL : string
+  bannerURL : string
+  phone : string
+  address : string
+  rating : float64
+  isVerified : bool
+  createdAt : time.Time
+  updatedAt : time.Time
+}
+
+entity "Category" as Category {
+  * id : int64 <<PK>>
+  --
+  name : string
+  slug : string
+  icon : string
+  imageURL : string
+  description : string
+  sortOrder : int
+  createdAt : time.Time
+}
+
+entity "Product" as Product {
+  * id : int64 <<PK>>
+  --
+  shopID : int64 <<FK>>
+  categoryID : int64 <<FK>>
+  name : string
+  slug : string
+  description : string
+  price : float64
+  oldPrice : float64
+  stockQuantity : int
+  imageURL : string
+  additionalImages : string
+  status : ProductStatus
+  moderationComment : string
+  rating : float64
+  reviewsCount : int
+  salesCount : int
+  createdAt : time.Time
+  updatedAt : time.Time
+}
+
+entity "Order" as Order {
+  * id : int64 <<PK>>
+  --
+  orderNumber : string
+  userID : int64 <<FK>>
+  totalAmount : float64
+  status : OrderStatus
+  recipientName : string
+  recipientPhone : string
+  shippingAddress : string
+  paymentMethod : string
+  notes : string
+  createdAt : time.Time
+  updatedAt : time.Time
+}
+
+entity "SubOrder" as SubOrder {
+  * id : int64 <<PK>>
+  --
+  orderID : int64 <<FK>>
+  shopID : int64 <<FK>>
+  subtotalAmount : float64
+  status : SubOrderStatus
+  shippingTracking : string
+  createdAt : time.Time
+  updatedAt : time.Time
+}
+
+entity "OrderItem" as OrderItem {
+  * id : int64 <<PK>>
+  --
+  orderID : int64 <<FK>>
+  subOrderID : int64 <<FK>>
+  shopID : int64 <<FK>>
+  productID : int64 <<FK>>
+  productName : string
+  productPrice : float64
+  quantity : int
+  totalPrice : float64
+  imageURL : string
+  createdAt : time.Time
+}
+
+entity "Review" as Review {
+  * id : int64 <<PK>>
+  --
+  productID : int64 <<FK>>
+  userID : int64 <<FK>>
+  orderID : int64 <<FK>>
+  rating : int
+  comment : string
+  createdAt : time.Time
+  updatedAt : time.Time
+}
+
+' Связи между сущностями
+User ||--o| Shop : "владеет"
+Shop }|--|| User : "принадлежит"
+
+Shop ||--o{ Product : "содержит"
+Product }o--|| Shop : "продаётся в"
+
+Category ||--o{ Product : "категоризирует"
+Product }o--|| Category : "имеет категорию"
+
+User ||--o{ Order : "оформляет"
+Order }o--|| User : "принадлежит пользователю"
+
+Order ||--|{ SubOrder : "состоит из"
+SubOrder }|--|| Order : "часть заказа"
+
+SubOrder ||--|{ OrderItem : "включает"
+OrderItem }|--|| SubOrder : "позиция подзаказа"
+
+Product ||--o{ OrderItem : "продаётся как"
+OrderItem }o--|| Product : "ссылается на товар"
+
+Shop ||--o{ SubOrder : "исполняет"
+SubOrder }o--|| Shop : "для магазина"
+
+Product ||--o{ Review : "получает"
+Review }o--|| Product : "о товаре"
+
+User ||--o{ Review : "пишет"
+Review }o--|| User : "от пользователя"
+
+legend right
+  **Обозначения:**
+  
+  * — первичный ключ (PK)
+  <<FK>> — внешний ключ
+  
+  ||--o| : один к одному (0..1)
+  ||--o{ : один ко многим (0..*)
+  ||--|{ : один ко многим (1..*)
+  }o--|| : многие к одному (0..1)
+  }|--|| : многие к одному (1)
+  
+  **Типы связей:**
+  Композиция (жирная линия): 
+  Order *-- SubOrder *-- OrderItem
+  
+  Агрегация (ромб):
+  Shop o-- Product
+  
+  Ассоциация (простая):
+  User -- Shop
+endlegend
+
+@enduml
