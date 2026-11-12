@@ -1,0 +1,61 @@
+@startuml deployment
+title marketplace: Диаграмма развёртывания
+
+skinparam node {
+  BackgroundColor #FEFECE
+  BorderColor #A80036
+}
+
+skinparam artifact {
+  BackgroundColor #E8F4F8
+  BorderColor #0275D8
+}
+
+node "ПК пользователя" as pc {
+  artifact "Браузер\n(Chrome/Firefox/Edge,\nBootstrap 5.3)" as browser
+}
+
+node "Linux VDS (Ubuntu 24.04)" as vds {
+  
+  node "Nginx 1.24\n(Reverse Proxy)" as nginx {
+    artifact "deploy/nginx.conf\n(SSL, static files)" as nconf
+  }
+  
+  node "Go 1.21+\n(marketplace.exe)" as goapp {
+    artifact "marketplace/\n(handlers/, models/,\nmiddleware/, utils/)" as app
+    artifact "config/.env\n(DB connection string)" as cfg
+  }
+  
+  database "MS SQL Server 2019+\nmarketplace\n(UTF-8 collation)" as db {
+    folder "data/\nmarketplace.mdf\nmarketplace.ldf" as dbfiles
+  }
+  
+  folder "uploads/\n(фото товаров)" as uploads
+}
+
+' Связи между компонентами
+browser --> nginx : HTTPS :443\n(HTTP/2)
+nginx --> goapp : Reverse Proxy\n:8089
+goapp --> db : TDS (Tabular Data Stream)\nTCP 1433\n(GORM ORM)
+goapp --> uploads : запись файлов\n(os.Create)
+nginx --> uploads : отдача статики\n(/uploads/)
+
+' Обратная связь
+goapp ..> browser : JSON API\n(application/json)
+db ..> goapp : ResultSet\n(T-SQL)
+
+legend right
+  **Протоколы и порты:**
+  
+  • HTTPS :443 — браузер ↔ Nginx
+  • HTTP :8089 — Nginx ↔ Go app
+  • TDS :1433 — Go app ↔ MS SQL Server
+  
+  **Компоненты:**
+  • Nginx — reverse proxy, SSL termination
+  • Go app — бизнес-логика, REST API
+  • MS SQL Server — хранение данных (UTF-8)
+  • uploads/ — файловое хранилище
+endlegend
+
+@enduml
