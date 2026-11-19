@@ -1,7 +1,7 @@
 # UI-kit: Маркетплейс marketplace
 
-**Figma файл:** [[ВСТАВЬ ССЫЛКУ ИЗ FIGMA](https://www.figma.com/design/RkrOs8xLNOm7H66iIU2lpV/marketplace?node-id=1-5&t=yQkSUb4p6uqN0pJ0-1)]  
-**Прототип:** [[ВСТАВЬ ССЫЛКУ НА ПРОТОТИП](https://www.figma.com/design/RkrOs8xLNOm7H66iIU2lpV/marketplace?node-id=0-1&t=yQkSUb4p6uqN0pJ0-1)]
+**Figma файл:** (https://www.figma.com/design/RkrOs8xLNOm7H66iIU2lpV/marketplace?node-id=1-5&t=yQkSUb4p6uqN0pJ0-1)
+**Прототип:** (https://www.figma.com/design/RkrOs8xLNOm7H66iIU2lpV/marketplace?node-id=0-1&t=yQkSUb4p6uqN0pJ0-1)
 
 ## 1. Сетка (Layout Grid)
 - **Desktop (1440px):** 12 колонок, ширина колонки 88px, gutter 24px. Ширина контента 1320px (как `.container` в Bootstrap 5.3).
