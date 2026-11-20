@@ -34,5 +34,5 @@
 - **ProductCard:** Карточка товара на Auto Layout (аналог CSS Flexbox). При длинном названии карточка растягивается автоматически.
 
 ## 5. Экраны (Mockups)
-![Каталог товаров](screens/products.png)
-![Карточка товара](screens/product-detail.png)
+![Каталог товаров](09-screens/products.png)
+![Карточка товара](09-screens/product-detail.png)
