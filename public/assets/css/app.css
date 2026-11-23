@@ -1,0 +1,200 @@
+/* public/assets/css/app.css — стили маркетплейса */
+
+:root {
+  /* ЦВЕТА ИЗ UI-KIT ЛАБ. 9 */
+  --mp-primary: #0D6EFD;
+  --mp-primary-dark: #0B5ED7;
+  --mp-primary-light: #E7F1FF;
+  --mp-success: #198754;
+  --mp-warning: #FFC107;
+  --mp-danger: #DC3545;
+  --mp-text: #212529;
+  --mp-muted: #6C757D;
+  --mp-border: #DEE2E6;
+  --mp-bg: #F8F9FA;
+  --mp-radius: 8px;
+
+  /* Переопределяем Bootstrap */
+  --bs-body-font-family: "Noto Sans", system-ui, "Segoe UI", Roboto, sans-serif;
+  --bs-body-font-size: 1rem;
+  --bs-body-color: var(--mp-text);
+  --bs-body-bg: var(--mp-bg);
+  --bs-border-color: var(--mp-border);
+  --bs-border-radius: var(--mp-radius);
+  --bs-primary: var(--mp-primary);
+  --bs-primary-rgb: 13, 110, 253;
+  --bs-link-color: var(--mp-primary);
+}
+
+/* ===== ТИПОГРАФИКА ===== */
+h1 { font-size: 2rem; font-weight: 700; color: var(--mp-text); }
+h2 { font-size: 1.5rem; font-weight: 600; }
+h3 { font-size: 1.25rem; font-weight: 600; }
+
+/* ===== ШАПКА ===== */
+.app-navbar {
+  background: var(--mp-primary);
+  padding: 1rem 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+.app-navbar .navbar-brand {
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+/* ===== КНОПКИ ===== */
+.btn {
+  min-height: 44px;
+  border-radius: var(--mp-radius);
+  font-weight: 500;
+  transition: all .15s ease;
+}
+.btn-primary {
+  --bs-btn-bg: var(--mp-primary);
+  --bs-btn-border-color: var(--mp-primary);
+  --bs-btn-hover-bg: var(--mp-primary-dark);
+  --bs-btn-hover-border-color: var(--mp-primary-dark);
+}
+
+/* ===== КАРТОЧКИ ===== */
+.card {
+  border: 1px solid var(--mp-border);
+  border-radius: var(--mp-radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  transition: box-shadow .2s ease;
+}
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+}
+
+/* ===== БАННЕР НА ГЛАВНОЙ ===== */
+.hero-banner {
+  background: linear-gradient(135deg, var(--mp-primary) 0%, var(--mp-primary-dark) 100%);
+  color: white;
+  border-radius: var(--mp-radius);
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+}
+.hero-banner h1 {
+  color: white;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+.hero-banner p {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  opacity: .95;
+}
+
+/* ===== КАРТОЧКА ТОВАРА ===== */
+.product-card {
+  background: white;
+  border-radius: var(--mp-radius);
+  overflow: hidden;
+}
+.product-thumb {
+  height: 200px;
+  background: var(--mp-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mp-muted);
+  font-size: .875rem;
+}
+.product-price {
+  color: var(--mp-primary);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+/* ===== БЕЙДЖИ СТАТУСОВ ===== */
+.badge.status {
+  font-weight: 600;
+  border-radius: 999px;
+  padding: .35em .75em;
+}
+.status-active { background: #E3F4EA; color: var(--mp-success); }
+.status-pending { background: #FFF3CD; color: #5C4400; }
+.status-out { background: #FDE8E6; color: var(--mp-danger); }
+
+/* ===== СТАТИСТИКА ===== */
+.stat-card {
+  text-align: center;
+  padding: 1.5rem;
+}
+.stat-card .h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--mp-primary);
+  margin-bottom: .5rem;
+}
+.stat-card .text-muted {
+  font-size: .875rem;
+}
+
+/* ===== ФИЛЬТРЫ ===== */
+.filters-card {
+  background: white;
+  border-radius: var(--mp-radius);
+  padding: 1.5rem;
+}
+.filters-card .form-label {
+  color: var(--mp-muted);
+  font-size: .875rem;
+  font-weight: 500;
+}
+
+/* ===== ХАРАКТЕРИСТИКИ (CSS Grid) ===== */
+.product-details {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: .5rem 1rem;
+  margin: 0;
+}
+.product-details dt {
+  color: var(--mp-muted);
+  font-weight: 400;
+}
+.product-details dd {
+  margin: 0;
+}
+
+/* ===== ДОСТУПНОСТЬ ===== */
+:focus-visible {
+  outline: 3px solid rgba(13, 110, 253, .45);
+  outline-offset: 2px;
+}
+
+/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+@media (max-width: 575.98px) {
+  .hero-banner {
+    padding: 1.5rem;
+  }
+  .hero-banner h1 {
+    font-size: 1.5rem;
+  }
+  .hero-banner p {
+    font-size: .95rem;
+  }
+  .product-thumb {
+    height: 140px;
+  }
+  .product-details {
+    grid-template-columns: 1fr;
+  }
+  .stat-card .h3 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .product-thumb {
+    height: 160px;
+  }
+}
+
+@media print {
+  .app-navbar, .app-footer, .btn, .filters-card {
+    display: none !important;
+  }
+}
