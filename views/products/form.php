@@ -18,7 +18,6 @@
 <h1 class="mb-4">Илова кардани моли нав</h1>
 
 <form class="card card-body" method="post" action="<?= $this->url('/products/create') ?>" novalidate>
-
     <div class="mb-3">
         <label class="form-label" for="name">Номи мол *</label>
         <input class="form-control <?= isset($errors['name']) ? 'is-invalid' : '' ?>"

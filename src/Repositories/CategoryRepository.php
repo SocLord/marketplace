@@ -2,11 +2,12 @@
 namespace App\Repositories;
 
 use App\Core\Database;
-use PDO;
-final class CategoryRepository {
-    private PDO $db;
+use \PDO;
 
-    public function __construct(?PDO $db = null) {
+final class CategoryRepository {
+    private \PDO $db;
+
+    public function __construct(?\PDO $db = null) {
         $this->db = $db ?? Database::connection();
     }
 
@@ -18,9 +19,8 @@ final class CategoryRepository {
         return array_column($this->db->query('SELECT id FROM categories')->fetchAll(), 'id');
     }
 
-
     public function withProductCounts(): array {
-        $sql = 'SELECT c.id, c.name, COUNT(p.id) AS total
+        $sql = 'SELECT c.name, COUNT(p.id) AS total
                 FROM categories c
                 LEFT JOIN products p ON p.category_id = c.id
                 GROUP BY c.id, c.name

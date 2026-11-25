@@ -11,7 +11,6 @@ final class ReportController extends Controller {
         $this->categories = new CategoryRepository();
     }
 
-    /** GET /reports/categories */
     public function categories(): void {
         $rows = $this->categories->withProductCounts();
         $this->render('reports/categories', [

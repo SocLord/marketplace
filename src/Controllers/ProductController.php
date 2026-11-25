@@ -5,7 +5,7 @@ use App\Core\Validator;
 use App\Repositories\ProductRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ShopRepository;
-use PDOException;
+use \PDOException;
 
 final class ProductController extends Controller {
     private ProductRepository $products;
@@ -19,7 +19,10 @@ final class ProductController extends Controller {
         $this->shops = new ShopRepository();
     }
 
-    /** GET /products */
+    public function home(): void {
+        $this->redirect('/products');
+    }
+
     public function index(): void {
         $page = max(1, (int)($_GET['page'] ?? 1));
         $filters = [
@@ -40,7 +43,18 @@ final class ProductController extends Controller {
         ]);
     }
 
-    /** GET /products/create */
+    public function show(int $id): void {
+        $product = $this->products->find($id);
+        if ($product === null) {
+            $this->abort(404, 'Мол ёфт нашуд');
+        }
+        $this->render('products/show', [
+            'title' => $product['name'],
+            'active' => 'products',
+            'product' => $product,
+        ]);
+    }
+
     public function create(): void {
         $this->render('products/form', [
             'title' => 'Иловаи мол',
@@ -52,7 +66,6 @@ final class ProductController extends Controller {
         ]);
     }
 
-    /** POST /products/create */
     public function store(): void {
         $v = new Validator($_POST);
         $v->required('name', 'Ном')->maxLength('name', 255, 'Ном')
@@ -92,7 +105,6 @@ final class ProductController extends Controller {
         $this->redirect('/products?msg=created');
     }
 
-    /** POST /products/{id}/delete */
     public function delete(int $id): void {
         try {
             $this->products->delete($id);

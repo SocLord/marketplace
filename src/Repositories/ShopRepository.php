@@ -2,11 +2,12 @@
 namespace App\Repositories;
 
 use App\Core\Database;
-use PDO;
-final class ShopRepository {
-    private PDO $db;
+use \PDO;
 
-    public function __construct(?PDO $db = null) {
+final class ShopRepository {
+    private \PDO $db;
+
+    public function __construct(?\PDO $db = null) {
         $this->db = $db ?? Database::connection();
     }
 

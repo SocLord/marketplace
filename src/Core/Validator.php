@@ -1,5 +1,6 @@
 <?php
 namespace App\Core;
+
 final class Validator {
     private array $data;
     private array $errors = [];
@@ -22,17 +23,10 @@ final class Validator {
         return $this;
     }
 
-
     public function in(string $field, array $allowed, string $label): self {
         if (isset($this->data[$field]) && !in_array($this->data[$field], $allowed, true)) {
             $this->errors[$field] = "Қимати «{$label}» нодуруст аст.";
         }
-        return $this;
-    }
-
-
-    public function addError(string $field, string $message): self {
-        $this->errors[$field] = $message;
         return $this;
     }
 

@@ -11,6 +11,10 @@
                        href="<?= $this->url('/products') ?>">Каталог</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link <?= $active === 'shops' ? 'active' : '' ?>" 
+                       href="<?= $this->url('/shops') ?>">Мағозаҳо</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link <?= $active === 'reports' ? 'active' : '' ?>" 
                        href="<?= $this->url('/reports/categories') ?>">Ҳисобот</a>
                 </li>

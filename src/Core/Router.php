@@ -22,9 +22,6 @@ final class Router {
         ];
     }
 
-    /**
-     * '/products/{id}/delete' → '#^/products/(?P<id>\d+)/delete$#'
-     */
     private function toRegex(string $path): string {
         $pattern = preg_replace('#\{(\w+)\}#', '(?P<$1>\d+)', $path);
         return '#^' . $pattern . '$#';
@@ -57,7 +54,6 @@ final class Router {
                 continue;
             }
 
-            // Только именованные параметры: ['id' => '15'] → [15]
             $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
             $params = array_map('intval', array_values($params));
 
