@@ -1,4 +1,8 @@
 <?php
+namespace App\Repositories;
+
+use App\Core\Database;
+use PDO;
 final class ShopRepository {
     private PDO $db;
 

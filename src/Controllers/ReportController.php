@@ -1,16 +1,23 @@
 <?php
-final class ReportController {
+namespace App\Controllers;
+
+use App\Repositories\CategoryRepository;
+
+final class ReportController extends Controller {
     private CategoryRepository $categories;
 
     public function __construct() {
+        parent::__construct();
         $this->categories = new CategoryRepository();
     }
 
+    /** GET /reports/categories */
     public function categories(): void {
-
         $rows = $this->categories->withProductCounts();
-        
-        
-        require BASE_PATH . '/views/reports/categories.php';
+        $this->render('reports/categories', [
+            'title' => 'Ҳисобот',
+            'active' => 'reports',
+            'rows' => $rows,
+        ]);
     }
 }

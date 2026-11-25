@@ -1,20 +1,28 @@
 <?php
+declare(strict_types=1);
+
+use App\Controllers\ProductController;
+use App\Controllers\ReportController;
+use App\Core\Router;
+
 define('BASE_PATH', dirname(__DIR__));
 
+// 1. Автозагрузка Composer (PSR-4)
+if (is_file(BASE_PATH . '/vendor/autoload.php')) {
+    require BASE_PATH . '/vendor/autoload.php';
+} else {
+    // Резервный вариант, если composer dump-autoload не запускался
+    spl_autoload_register(function (string $class): void {
+        if (str_starts_with($class, 'App\\')) {
+            $file = BASE_PATH . '/src/' . str_replace('\\', '/', substr($class, 4)) . '.php';
+            if (is_file($file)) {
+                require $file;
+            }
+        }
+    });
+}
 
-require BASE_PATH . '/src/Core/Database.php';
-require BASE_PATH . '/src/Core/Validator.php';
-
-
-require BASE_PATH . '/src/Repositories/ProductRepository.php';
-require BASE_PATH . '/src/Repositories/CategoryRepository.php';
-require BASE_PATH . '/src/Repositories/ShopRepository.php';
-
-
-require BASE_PATH . '/src/Controllers/ProductController.php';
-require BASE_PATH . '/src/Controllers/ReportController.php';
-
-
+// 2. Конфигурация и обработка ошибок
 $configFile = BASE_PATH . '/config/config.php';
 if (!is_file($configFile)) {
     $configFile = BASE_PATH . '/config/config.example.php';
@@ -24,33 +32,28 @@ $config = require $configFile;
 ini_set('display_errors', $config['debug'] ? '1' : '0');
 error_reporting(E_ALL);
 
-Database::configure($config['db']);
+// Инициализация БД (если класс существует)
+if (class_exists('App\Core\Database')) {
+    App\Core\Database::configure($config['db']);
+}
 
-
-set_exception_handler(function(Throwable $e) use ($config): void {
+set_exception_handler(function (Throwable $e) use ($config): void {
     error_log((string)$e);
     http_response_code(500);
     echo $config['debug'] ? $e->getMessage() : 'Баъдтар кӯшиш кунед ё ба администратор муроҷиат намоед.';
 });
 
+// 3. Настройка маршрутов (Router)
+$router = new Router();
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$method = $_SERVER['REQUEST_METHOD'];
+// Маршруты продуктов
+$router->get('/products', [ProductController::class, 'index']);
+$router->get('/products/create', [ProductController::class, 'create']);
+$router->post('/products/create', [ProductController::class, 'store']);
+$router->post('/products/{id}/delete', [ProductController::class, 'delete']);
 
-$productController = new ProductController();
-$reportController = new ReportController();
+// Маршруты отчётов
+$router->get('/reports/categories', [ReportController::class, 'categories']);
 
-if ($uri === '/products' && $method === 'GET') {
-    $productController->index();
-} elseif ($uri === '/products/create' && $method === 'GET') {
-    $productController->create();
-} elseif ($uri === '/products/create' && $method === 'POST') {
-    $productController->store();
-} elseif (preg_match('#^/products/(\d+)/delete$#', $uri, $matches) && $method === 'POST') {
-    $productController->delete((int)$matches[1]);
-} elseif ($uri === '/reports/categories' && $method === 'GET') {
-    $reportController->categories();
-} else {
-    http_response_code(404);
-    echo '<h1>404</h1><p>Саҳифа ёфт нашуд.</p><a href="/products">Ба каталог баргаштан</a>';
-}
+// 4. Запуск роутера
+$router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);

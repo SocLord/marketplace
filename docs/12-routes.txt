@@ -1,0 +1,26 @@
+# Проверка маршрутов лабораторной 12
+# Выполнено: 25.11.2026
+
+# 1. Главная страница каталога
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/products
+# Ожидаемый результат: 200
+
+# 2. Страница создания товара
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/products/create
+# Ожидаемый результат: 200
+
+# 3. Страница отчёта
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/reports/categories
+# Ожидаемый результат: 200
+
+# 4. Несуществующая страница (404)
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/abc
+# Ожидаемый результат: 404
+
+# 5. Неправильный метод (405)
+curl -s -o /dev/null -w "%{http_code}\n" -X POST http://localhost:8000/products
+# Ожидаемый результат: 405
+
+# 6. Страница товара по ID (если есть маршрут /products/{id})
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/products/37
+# Ожидаемый результат: 200 или 404 (зависит от реализации)

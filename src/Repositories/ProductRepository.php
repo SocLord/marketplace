@@ -1,4 +1,9 @@
 <?php
+namespace App\Repositories;
+
+use App\Core\Database;
+use PDO;
+
 final class ProductRepository {
   
     public const FIELDS = [

@@ -1,15 +1,25 @@
 <?php
-final class ProductController {
+namespace App\Controllers;
+
+use App\Core\Validator;
+use App\Repositories\ProductRepository;
+use App\Repositories\CategoryRepository;
+use App\Repositories\ShopRepository;
+use PDOException;
+
+final class ProductController extends Controller {
     private ProductRepository $products;
     private CategoryRepository $categories;
     private ShopRepository $shops;
 
     public function __construct() {
+        parent::__construct();
         $this->products = new ProductRepository();
         $this->categories = new CategoryRepository();
         $this->shops = new ShopRepository();
     }
 
+    /** GET /products */
     public function index(): void {
         $page = max(1, (int)($_GET['page'] ?? 1));
         $filters = [
@@ -19,71 +29,77 @@ final class ProductController {
         
         $result = $this->products->paginate($filters, $page, 10);
         
-        $items = $result['items'];
-        $total = $result['total'];
-        $page = $result['page'];
-        $pages = $result['pages'];
-        
-        require BASE_PATH . '/views/products/index.php';
+        $this->render('products/index', [
+            'title' => 'Каталог',
+            'active' => 'products',
+            'items' => $result['items'],
+            'total' => $result['total'],
+            'page' => $result['page'],
+            'pages' => $result['pages'],
+            'filters' => $filters,
+        ]);
     }
 
+    /** GET /products/create */
     public function create(): void {
-        $errors = [];
-        $data = [];
-        $categories = $this->categories->all();
-        $shops = $this->shops->all();
-        require BASE_PATH . '/views/products/form.php';
+        $this->render('products/form', [
+            'title' => 'Иловаи мол',
+            'active' => 'products',
+            'errors' => [],
+            'data' => [],
+            'categories' => $this->categories->all(),
+            'shops' => $this->shops->all(),
+        ]);
     }
 
-public function store(): void {
-    $v = new Validator($_POST);
-    $v->required('name', 'Ном')->maxLength('name', 255, 'Ном')
-      ->required('price', 'Нарх')
-      ->required('category_id', 'Категория')
-      ->required('shop_id', 'Мағоза')
-      ->in('status', ['approved', 'pending', 'rejected'], 'Статус');
+    /** POST /products/create */
+    public function store(): void {
+        $v = new Validator($_POST);
+        $v->required('name', 'Ном')->maxLength('name', 255, 'Ном')
+          ->required('price', 'Нарх')
+          ->required('category_id', 'Категория')
+          ->required('shop_id', 'Мағоза')
+          ->in('status', ['approved', 'pending', 'rejected'], 'Статус');
 
-    if ($v->fails()) {
-        http_response_code(422);
-        $errors = $v->errors();
-        $data = $_POST;
-        $categories = $this->categories->all();
-        $shops = $this->shops->all();
-        require BASE_PATH . '/views/products/form.php';
-        return;
+        if ($v->fails()) {
+            $this->render('products/form', [
+                'title' => 'Иловаи мол',
+                'active' => 'products',
+                'errors' => $v->errors(),
+                'data' => $_POST,
+                'categories' => $this->categories->all(),
+                'shops' => $this->shops->all(),
+            ], 422);
+            return;
+        }
+
+        $insertData = [
+            'name' => trim($_POST['name']),
+            'slug' => $this->generateSlug($_POST['name']),
+            'description' => trim($_POST['description'] ?? '') ?: '',
+            'price' => (float)$_POST['price'],
+            'old_price' => !empty($_POST['old_price']) ? (float)$_POST['old_price'] : 0,
+            'stock_quantity' => (int)($_POST['stock_quantity'] ?? 0),
+            'image_url' => trim($_POST['image_url'] ?? '') ?: '',
+            'additional_images' => '',
+            'status' => $_POST['status'] ?? 'pending',
+            'moderation_comment' => '',
+            'category_id' => (int)$_POST['category_id'],
+            'shop_id' => (int)$_POST['shop_id'],
+        ];
+
+        $id = $this->products->create($insertData);
+        $this->redirect('/products?msg=created');
     }
 
-    // Собираем данные для INSERT
-    // ВАЖНО: для NOT NULL строковых полей используем '' вместо null!
-    $insertData = [
-        'name' => trim($_POST['name']),
-        'slug' => $this->generateSlug($_POST['name']),
-        'description' => trim($_POST['description'] ?? '') ?: '',  // '' вместо null
-        'price' => (float)$_POST['price'],
-        'old_price' => !empty($_POST['old_price']) ? (float)$_POST['old_price'] : 0,  // 0 вместо null
-        'stock_quantity' => (int)($_POST['stock_quantity'] ?? 0),
-        'image_url' => trim($_POST['image_url'] ?? '') ?: '',  // '' вместо null
-        'additional_images' => '',  // '' вместо null
-        'status' => $_POST['status'] ?? 'pending',
-        'moderation_comment' => '',  // '' вместо null
-        'category_id' => (int)$_POST['category_id'],
-        'shop_id' => (int)$_POST['shop_id'],
-    ];
-
-    $id = $this->products->create($insertData);
-    header('Location: /products?msg=created');
-    exit;
-}
+    /** POST /products/{id}/delete */
     public function delete(int $id): void {
         try {
             $this->products->delete($id);
-            header('Location: /products?msg=deleted');
-            exit;
+            $this->redirect('/products?msg=deleted');
         } catch (PDOException $e) {
-            // 547 = нарушение внешнего ключа в SQL Server
             if (strpos($e->getMessage(), '547') !== false) {
-                header('Location: /products?msg=fk_error');
-                exit;
+                $this->redirect('/products?msg=fk_error');
             }
             throw $e;
         }
@@ -93,6 +109,10 @@ public function store(): void {
         $text = mb_strtolower($text, 'UTF-8');
         $text = preg_replace('/[^a-zа-яё0-9\s-]/u', '', $text);
         $text = preg_replace('/[\s-]+/', '-', $text);
-        return trim($text, '-') ?: 'product-' . time();
+        $slug = trim($text, '-');
+        if ($slug === '') {
+            $slug = 'product-' . time();
+        }
+        return mb_substr($slug, 0, 255);
     }
 }

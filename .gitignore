@@ -1,0 +1,21 @@
+# Composer
+/vendor/
+
+# Конфигурация с паролями
+/config/config.php
+
+# Окружение
+.env
+
+# Загрузки
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# PHP
+.phpunit.cache/
+.phpunit.result.cache
