@@ -14,7 +14,7 @@ final class CategoryRepository {
         return array_column($this->db->query('SELECT id FROM categories')->fetchAll(), 'id');
     }
 
-    // Отчёт с GROUP BY (требование методички)
+
     public function withProductCounts(): array {
         $sql = 'SELECT c.id, c.name, COUNT(p.id) AS total
                 FROM categories c

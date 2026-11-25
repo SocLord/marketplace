@@ -1,6 +1,6 @@
 <?php
 final class ProductRepository {
-    // Реальные поля из твоей БД MarketplaceDB
+  
     public const FIELDS = [
         'name', 'slug', 'description', 'price', 'old_price', 
         'stock_quantity', 'image_url', 'additional_images', 
@@ -42,16 +42,16 @@ final class ProductRepository {
     public function paginate(array $filters, int $page, int $perPage = 10): array {
         [$where, $params] = $this->buildWhere($filters);
 
-        // 1. Считаем общее количество
+        
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM products p {$where}");
         $stmt->execute($params);
         $total = (int)$stmt->fetchColumn();
 
-        // 2. Корректируем номер страницы
+        
         $pages = max(1, (int)ceil($total / $perPage));
         $page = min(max(1, $page), $pages);
 
-        // 3. Пагинация для SQL Server: OFFSET ... FETCH
+
         $sql = self::SELECT . "{$where} ORDER BY p.id DESC OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
         $stmt = $this->db->prepare($sql);
         
@@ -76,8 +76,7 @@ final class ProductRepository {
     $placeholders = ':' . implode(',:', self::FIELDS);
     $stmt = $this->db->prepare("INSERT INTO products ({$columns}) VALUES ({$placeholders})");
     
-    // КРИТИЧНО: гарантируем, что ВСЕ поля из FIELDS есть в массиве параметров
-    // Даже если форма их не отправила — ставим NULL
+
     $execData = [];
     foreach (self::FIELDS as $field) {
         $execData[':' . $field] = $data[$field] ?? null;

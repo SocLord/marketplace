@@ -1,5 +1,5 @@
 <?php
-// config/config.example.php — пример конфигурации (в Git)
+
 return [
     'db' => [
         'driver' => 'sqlsrv',

@@ -21,7 +21,7 @@ final class Validator {
         return $this;
     }
 
-    // НОВЫЙ МЕТОД: проверка, что значение есть в списке допустимых
+
     public function in(string $field, array $allowed, string $label): self {
         if (isset($this->data[$field]) && !in_array($this->data[$field], $allowed, true)) {
             $this->errors[$field] = "Қимати «{$label}» нодуруст аст.";
@@ -29,7 +29,7 @@ final class Validator {
         return $this;
     }
 
-    // НОВЫЙ МЕТОД: добавить произвольную ошибку (для кастомных правил)
+
     public function addError(string $field, string $message): self {
         $this->errors[$field] = $message;
         return $this;

@@ -10,7 +10,7 @@ final class Database {
     public static function connection(): PDO {
         if (self::$pdo === null) {
             $c = self::$config;
-            // DSN для SQL Server
+          
             $dsn = sprintf('sqlsrv:Server=%s,%d;Database=%s', 
                 $c['server'], $c['port'], $c['database']);
             

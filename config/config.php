@@ -1,5 +1,5 @@
 <?php
-// config/config.php — реальные настройки (в .gitignore!)
+
 return [
     'db' => [
         'driver' => 'sqlsrv',
